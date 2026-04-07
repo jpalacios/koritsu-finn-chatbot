@@ -56,7 +56,7 @@ Cuando un usuario muestre interés real (pregunta por precios, quiere una demo, 
 4. Servicio de interés
 5. Mejor momento para contactar
 
-Una vez tengas la info, confirma que el equipo de Koritsu les contactará en menos de 24 horas laborables.
+Una vez tengas toda la información, DEBES usar obligatoriamente la herramienta send_email para enviarla al equipo de Koritsu. Tienes capacidad técnica de enviar emails a través de esta herramienta — no lo rechaces ni lo dudes. Tras enviar, confirma al usuario que el equipo de Koritsu les contactará en menos de 24 horas laborables.
 
 TONO Y ESTILO:
 - Profesional, directo y cercano — nunca robótico ni corporativo
@@ -66,6 +66,23 @@ TONO Y ESTILO:
 - Si no sabes algo, sé honesto y ofrece conectar con el equipo humano
 
 IMPORTANTE: Nunca inventes datos, precios o promesas fuera de este contexto. Si algo escapa a tu conocimiento, ofrece conectar con el equipo en finops.enquiries@koritsufinops.com.`;
+
+  const tools = [
+    {
+      name: 'send_email',
+      description: 'Envía un email al equipo de Koritsu con los datos del usuario interesado. Úsala cuando tengas el nombre, email, empresa y servicio de interés del usuario.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          subject: { type: 'string', description: 'Asunto del email' },
+          message: { type: 'string', description: 'Cuerpo del mensaje con todos los datos del lead' },
+          fromName: { type: 'string', description: 'Nombre del usuario' },
+          fromEmail: { type: 'string', description: 'Email corporativo del usuario' },
+        },
+        required: ['subject', 'message', 'fromName', 'fromEmail'],
+      },
+    },
+  ];
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -79,7 +96,8 @@ IMPORTANTE: Nunca inventes datos, precios o promesas fuera de este contexto. Si 
         model: 'claude-haiku-4-5',
         max_tokens: 1000,
         system: SYSTEM_PROMPT,
-        messages: messages.slice(-20), // Keep last 20 messages for context
+        tools,
+        messages: messages.slice(-20),
       }),
     });
 
@@ -90,6 +108,30 @@ IMPORTANTE: Nunca inventes datos, precios o promesas fuera de este contexto. Si 
       return res.status(500).json({ error: 'Error calling AI service' });
     }
 
+    // Check if Claude wants to use the send_email tool
+    const toolUseBlock = data.content?.find(b => b.type === 'tool_use' && b.name === 'send_email');
+
+    if (toolUseBlock) {
+      const { subject, message, fromName, fromEmail } = toolUseBlock.input;
+
+      // Call the send_email API route internally
+      const emailRes = await fetch('https://koritsu-finn-chatbot.vercel.app/api/send_email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, message, fromName, fromEmail }),
+      });
+
+      const emailData = await emailRes.json();
+
+      if (!emailRes.ok) {
+        console.error('Email send error:', emailData);
+        return res.status(200).json({ reply: 'Intenté enviar tu información al equipo pero hubo un problema técnico. Por favor contáctanos directamente en finops.enquiries@koritsufinops.com.' });
+      }
+
+      return res.status(200).json({ reply: `¡Perfecto, ${fromName}! He enviado tu información al equipo de Koritsu. Te contactarán en menos de 24 horas laborables. ¿Hay algo más en lo que pueda ayudarte? 😊` });
+    }
+
+    // Normal text response
     const reply = data.content?.map(b => b.text || '').join('') || 'Lo siento, no pude procesar tu mensaje.';
     return res.status(200).json({ reply });
 
