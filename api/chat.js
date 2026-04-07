@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer';
+
 export default async function handler(req, res) {
   // Allow embedding from Wix
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -114,19 +116,26 @@ IMPORTANTE: Nunca inventes datos, precios o promesas fuera de este contexto. Si 
     if (toolUseBlock) {
       const { subject, message, fromName, fromEmail } = toolUseBlock.input;
 
-      // Call the send_email API route internally
-      const emailRes = await fetch('https://koritsu-finn-chatbot.vercel.app/api/send_email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject, message, fromName, fromEmail }),
+      // Send email directly using Nodemailer (no internal HTTP call)
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD,
+        },
       });
 
-      const emailData = await emailRes.json();
-
-      if (!emailRes.ok) {
-        console.error('Email send error:', emailData);
-        return res.status(200).json({ reply: 'Intenté enviar tu información al equipo pero hubo un problema técnico. Por favor contáctanos directamente en finops.enquiries@koritsufinops.com.' });
-      }
+      await transporter.sendMail({
+        from: `"FINN · Koritsu" <${process.env.GMAIL_USER}>`,
+        to: 'finops.enquiries@koritsufinops.com',
+        replyTo: fromEmail,
+        subject: subject || 'Mensaje desde el chatbot FINN',
+        html: `
+          <p><strong>Mensaje de:</strong> ${fromName} (${fromEmail})</p>
+          <p><strong>Mensaje:</strong></p>
+          <p>${message}</p>
+        `,
+      });
 
       return res.status(200).json({ reply: `¡Perfecto, ${fromName}! He enviado tu información al equipo de Koritsu. Te contactarán en menos de 24 horas laborables. ¿Hay algo más en lo que pueda ayudarte? 😊` });
     }
