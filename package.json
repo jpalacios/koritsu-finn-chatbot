@@ -1,0 +1,14 @@
+{
+  "name": "koritsu-finn-chatbot",
+  "version": "1.0.0",
+  "description": "FINN - Koritsu FinOps AI Chatbot",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "nodemailer": "^3.1.3"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.17"
+  }
+}
