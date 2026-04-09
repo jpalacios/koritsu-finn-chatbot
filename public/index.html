@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -34,7 +34,6 @@
       overflow: hidden;
     }
 
-    /* Ambient background glow */
     body::before {
       content: '';
       position: fixed;
@@ -66,7 +65,6 @@
       max-height: 780px;
     }
 
-    /* Header */
     .header {
       display: flex;
       align-items: center;
@@ -121,7 +119,6 @@
       animation: pulse 2.5s ease-in-out infinite;
     }
 
-    /* Chat window */
     .chat-window {
       flex: 1;
       background: var(--surface);
@@ -134,7 +131,6 @@
       animation: fadeUp 0.4s ease 0.1s both;
     }
 
-    /* Messages */
     .messages {
       flex: 1;
       overflow-y: auto;
@@ -197,7 +193,6 @@
     .bubble strong { color: var(--accent); font-weight: 600; }
     .bubble a { color: var(--accent2); text-decoration: none; }
 
-    /* Typing indicator */
     .typing {
       display: flex;
       gap: 5px;
@@ -216,7 +211,6 @@
     .typing span:nth-child(2) { animation-delay: 0.18s; background: mix(var(--accent), var(--accent2), 50%); }
     .typing span:nth-child(3) { animation-delay: 0.36s; background: var(--accent2); }
 
-    /* Quick replies */
     .quick-wrap {
       padding: 6px 18px 12px;
       display: flex;
@@ -243,7 +237,6 @@
       transform: translateY(-1px);
     }
 
-    /* Input area */
     .input-area {
       padding: 12px 14px;
       border-top: 1px solid var(--border);
@@ -289,7 +282,6 @@
     .send-btn:hover { transform: translateY(-1px); }
     .send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
-    /* Footer */
     .footer {
       text-align: center;
       font-size: 11px;
@@ -300,7 +292,6 @@
     .footer a { color: #2a4050; text-decoration: none; }
     .footer a:hover { color: var(--muted); }
 
-    /* Error */
     .error-msg {
       text-align: center;
       color: #f87171;
@@ -326,11 +317,11 @@
     <div class="logo-mark">⚡</div>
     <div class="header-text">
       <h1>FINN <span>·</span> Koritsu FinOps</h1>
-      <p>Asistente comercial · Responde al instante</p>
+      <p>Commercial Assistant · Replies instantly</p>
     </div>
     <div class="status">
       <div class="status-dot"></div>
-      En línea
+      Online
     </div>
   </div>
 
@@ -342,7 +333,7 @@
     <div id="errorBox" class="error-msg" style="display:none"></div>
 
     <div class="input-area">
-      <textarea id="input" placeholder="Escribe tu pregunta..." rows="1"></textarea>
+      <textarea id="input" placeholder="Type your question..." rows="1"></textarea>
       <button class="send-btn" id="sendBtn">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
           <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -353,17 +344,17 @@
 
   <!-- Footer -->
   <div class="footer">
-    FINN puede cometer errores · <a href="mailto:finops.enquiries@koritsufinops.com">finops.enquiries@koritsufinops.com</a>
+    FINN may make mistakes · <a href="mailto:finops.enquiries@koritsufinops.com">finops.enquiries@koritsufinops.com</a>
   </div>
 
 </div>
 
 <script>
   const QUICK_QUESTIONS = [
-    "¿Qué servicios ofrece Koritsu?",
-    "¿Cuánto puedo ahorrar en cloud?",
-    "Quiero agendar una demo",
-    "¿Hacéis formación FinOps?",
+    "What services does Koritsu offer?",
+    "How much can I save on cloud?",
+    "I'd like to schedule a demo",
+    "Do you offer FinOps training?",
   ];
 
   let history = [];
@@ -452,14 +443,14 @@
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || 'Error del servidor');
+      if (!res.ok) throw new Error(data.error || 'Server error');
 
       removeTyping();
       history.push({ role: 'assistant', content: data.reply });
       addMessage('assistant', data.reply);
     } catch (err) {
       removeTyping();
-      errorBox.textContent = 'Error de conexión. Por favor intenta de nuevo.';
+      errorBox.textContent = 'Connection error. Please try again.';
       errorBox.style.display = 'block';
       history.pop();
     } finally {
@@ -485,11 +476,15 @@
   sendBtn.addEventListener('click', () => sendMessage());
 
   // Init
-  const greeting = `¡Hola! Soy **FINN**, el asistente virtual de **Koritsu FinOps** 👋
+  const greeting = `Hi! I'm **FINN**, the virtual assistant of **Koritsu FinOps** 👋
 
-Puedo ayudarte con información sobre nuestros servicios de optimización cloud, governance FinOps, dashboards de costos y formación — o ayudarte a agendar una demo con nuestro equipo.
+I can help you with information about our cloud optimisation services, FinOps governance, cost dashboards and training — or help you schedule a demo with our team.
 
-¿En qué puedo ayudarte hoy?`;
+I'm also a **FinOps Framework expert** — feel free to ask me anything about principles, domains, capabilities or maturity models.
+
+*I speak Spanish too — just write to me in Spanish and I'll switch! 🇪🇸*
+
+How can I help you today?`;
 
   history.push({ role: 'assistant', content: greeting });
   addMessage('assistant', greeting);
