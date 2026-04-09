@@ -2,6 +2,7 @@
   "name": "koritsu-finn-chatbot",
   "version": "1.0.0",
   "description": "FINN - Koritsu FinOps AI Chatbot",
+  "type": "module",
   "scripts": {
     "dev": "vercel dev"
   },
