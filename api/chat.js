@@ -209,7 +209,7 @@ IMPORTANT: Never invent data, prices or promises outside this context. If someth
     }
 
     // Normal text response
-    const reply = data.content?.map(b => b.text || '').join('') || 'I'm sorry, I could not process your message.';
+    const reply = data.content?.map(b => b.text || '').join('') || "I'm sorry, I could not process your message.";
     return res.status(200).json({ reply });
 
   } catch (err) {
